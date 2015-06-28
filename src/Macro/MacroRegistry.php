@@ -12,6 +12,59 @@ class MacroRegistry extends ObjectRegistry
 {
 
     /**
+     * Loads/constructs an object instance.
+     *
+     * Will return the instance in the registry if it already exists.
+     * If a subclass provides event support, you can use `$config['enabled'] = false`
+     * to exclude constructed objects from being registered for events.
+     *
+     * Using Cake\Controller\Controller::$components as an example. You can alias
+     * an object by setting the 'className' key, i.e.,
+     *
+     * ```
+     * public $components = [
+     *   'Email' => [
+     *     'className' => '\App\Controller\Component\AliasedEmailComponent'
+     *   ];
+     * ];
+     * ```
+     *
+     * All calls to the `Email` component would use `AliasedEmail` instead.
+     *
+     * @param string $objectName The name/class of the object to load.
+     * @param array $config Additional settings to use when loading the object.
+     * @return mixed
+     */
+    public function load($objectName, $config = [])
+    {
+        list(, $name) = pluginSplit($objectName);
+        $loaded = isset($this->_loaded[$name]);
+        if ($loaded && !empty($config)) {
+            $this->_checkDuplicate($name, $config);
+        }
+        if ($loaded) {
+            return $this->_loaded[$name];
+        }
+
+        if (is_array($config) && isset($config['className'])) {
+            $objectName = $config['className'];
+        }
+        $className = $this->_resolveClassName($objectName);
+        if (!$className || (is_string($className) && !class_exists($className))) {
+            list($plugin, $objectName) = pluginSplit($objectName);
+
+            return $this->load($objectName, [
+                'className' => '\Macro\Macro\ModelMacro',
+                'table' => $plugin . '.' . $objectName
+            ]);
+        }
+        $instance = $this->_create($className, $name, $config);
+        $this->_loaded[$name] = $instance;
+        return $instance;
+    }
+
+
+    /**
      * Resolve a panel classname.
      *
      * Part of the template method for Cake\Utility\ObjectRegistry::load()
