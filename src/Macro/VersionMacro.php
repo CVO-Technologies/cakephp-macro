@@ -2,12 +2,14 @@
 
 namespace Macro\Macro;
 
+use Cake\Core\Configure;
+
 class VersionMacro extends Macro
 {
 
     public function run()
     {
-        return '1.0';
+        return Configure::read('Macro.version');
     }
 
 }
