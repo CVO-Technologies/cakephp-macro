@@ -1,0 +1,30 @@
+{
+    "name": "cvo-technologies/macro",
+    "type": "cakephp-plugin",
+    "require": {
+        "cakephp/cakephp": "3.0.*"
+    },
+    "require-dev": {
+        "cakephp/cakephp-codesniffer": "dev-master",
+        "phpunit/phpunit": "4.1.*"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Marlin Cremers",
+            "email": "m.cremers@cvo-technologies.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Macro\\": "src",
+            "Macro\\Test\\Fixture\\": "tests\\Fixture"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Cake\\Test\\": "vendor/cakephp/cakephp/tests",
+            "Macro\\Test\\": "tests"
+        }
+    }
+}
