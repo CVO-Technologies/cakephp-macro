@@ -12,7 +12,7 @@ abstract class Macro
     use InstanceConfigTrait;
 
     protected $_defaultConfig = [
-        'context' => []
+        'context' => null
     ];
 
     /**
