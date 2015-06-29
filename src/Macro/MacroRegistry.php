@@ -4,6 +4,7 @@ namespace Macro\Macro;
 
 use Cake\Core\App;
 use Cake\Core\ObjectRegistry;
+use Macro\Error\MissingMacroException;
 
 /**
  * Registry object for macros.
@@ -95,7 +96,7 @@ class MacroRegistry extends ObjectRegistry
      */
     protected function _throwMissingClassError($class, $plugin)
     {
-        throw new \RuntimeException("Unable to find '$class' macro.");
+        throw new MissingMacroException("Unable to find '$class' macro.");
     }
 
     /**
