@@ -3,6 +3,7 @@
 namespace Macro\View\Helper;
 
 use Cake\View\Helper;
+use Macro\Error\MissingMacroException;
 use Macro\MacroTrait;
 
 class MacroHelper extends Helper
@@ -12,12 +13,26 @@ class MacroHelper extends Helper
 
     public function run($name)
     {
-        return $this->runMacro($name);
+        try {
+            return $this->runMacro($name);
+        }
+        catch (MissingMacroException $missing) {
+            trigger_error($missing->getMessage());
+        }
+
+        return null;
     }
 
     public function execute($content, $context = null)
     {
-        return $this->executeMacros($content, $context);
+        try {
+            return $this->executeMacros($content, $context);
+        }
+        catch (MissingMacroException $missing) {
+            trigger_error($missing->getMessage());
+        }
+
+        return null;
     }
 
 }
