@@ -58,6 +58,9 @@ abstract class Macro
     }
 
 
+    /**
+     * @return null
+     */
     public function run()
     {
     }
