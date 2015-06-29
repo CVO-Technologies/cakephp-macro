@@ -61,7 +61,7 @@ trait MacroTrait
 
         while ((!isset($count)) || $count > 1) {
             $content = preg_replace_callback(
-                '/\{\=(?P<name>[^\:\=\(]+)(\:\:(?P<method>[^\(\=]+))?(\((?P<parameters>.*)\))?\=\}/',
+                '/(?P<macro>\{\=(?P<name>[^\:\=\(]+)(?:\:\:(?P<method>[^\(\=]+))?(?:\((?P<parameters>.*)\))?\=\})/',
                 function (array $matches) use ($context) {
                     $identifier = $matches['name'];
                     $parameters = [];
