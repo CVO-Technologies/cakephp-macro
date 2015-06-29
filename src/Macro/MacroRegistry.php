@@ -53,10 +53,16 @@ class MacroRegistry extends ObjectRegistry
         if (!$className || (is_string($className) && !class_exists($className))) {
             list($plugin, $objectName) = pluginSplit($objectName);
 
-            return $this->load($objectName, [
+            /** @var ModelMacro $modelMacro */
+            $modelMacro = $this->load($objectName, [
                 'className' => '\Macro\Macro\ModelMacro',
                 'table' => $plugin . '.' . $objectName
             ]);
+            if (get_class($modelMacro->getTable()) !== 'Cake\\ORM\\Table') {
+                return $modelMacro;
+            }
+
+            $this->_throwMissingClassError($objectName, $plugin);
         }
         $instance = $this->_create($className, $name, $config);
         $this->_loaded[$name] = $instance;

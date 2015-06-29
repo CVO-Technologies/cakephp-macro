@@ -36,7 +36,7 @@ class ModelMacro extends Macro
     /**
      * @return Table
      */
-    protected function getTable()
+    public function getTable()
     {
         list($plugin, $table) = pluginSplit($this->modelClass, true);
 
