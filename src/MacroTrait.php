@@ -2,8 +2,11 @@
 
 namespace Macro;
 
+use Cake\Core\Exception\Exception;
 use Cake\Core\Plugin;
+use Cake\Utility\Hash;
 use DebugKit\DebugTimer;
+use Macro\Error\MissingMacroException;
 use Macro\Macro\Macro;
 use Macro\Macro\MacroRegistry;
 
@@ -15,8 +18,22 @@ trait MacroTrait
      */
     private $_registry = null;
 
-    public function runMacro($identifier, array $parameters = [], $context = null)
+    /**
+     * @param $identifier
+     * @param array $parameters
+     * @param null $context
+     * @throws MissingMacroException
+     * @return mixed
+     */
+    public function runMacro($identifier, array $parameters = [], $context = null, array $options = [])
     {
+        $options = Hash::merge(
+            [
+                'validate' => false
+            ],
+            $options
+        );
+
         if (Plugin::loaded('DebugKit')) {
             DebugTimer::start(__d('macro', 'Macro: {0}', $identifier));
         }
@@ -33,7 +50,17 @@ trait MacroTrait
         }
 
         /** @var Macro $macro */
-        $macro = $this->getMacroRegistry()->load($name, $config);
+        try {
+            $macro = $this->getMacroRegistry()->load($name, $config);
+        }
+        catch (MissingMacroException $missing) {
+            if (!$options['validate']) {
+                throw $missing;
+            }
+
+            return $missing;
+        }
+
         $result = call_user_func_array([$macro, $method], $parameters);
 
         if (Plugin::loaded('DebugKit')) {
@@ -42,29 +69,38 @@ trait MacroTrait
 
         DebugMacro::record($identifier, $result);
 
+        if ($options['validate']) {
+            return true;
+        }
+
         return $result;
     }
 
-    public function executeMacros($content, $context = null)
+    /**
+     * @param $content
+     * @param null $context
+     * @throws MissingMacroException
+     * @return mixed
+     */
+    public function executeMacros($content, $context = null, array $options = [])
     {
-        while ((!isset($count)) || $count > 1) {
-            $content = preg_replace_callback('/\{\=(?P<name>[^\:\=\(]+)(\:\:(?P<method>[^\(\=]+))?(\((?P<parameters>.*)\))?\=\}/', function (array $matches) use ($context) {
-                $identifier = $matches['name'];
-                $parameters = [];
+        $options = Hash::merge(
+            [
+                'validate' => false
+            ],
+            $options
+        );
 
-                if (!empty($matches['method'])) {
-                    $identifier .= '::' . $matches['method'];
-                }
-                if (!empty($matches['parameters'])) {
-                    $parameters = array_map('trim', explode(', ', $matches['parameters']));
-                }
+        $errors = [];
 
         while ((!isset($count)) || $count > 1) {
             $content = preg_replace_callback(
                 '/(?P<macro>\{\=(?P<name>[^\:\=\(]+)(?:\:\:(?P<method>[^\(\=]+))?(?:\((?P<parameters>.*)\))?\=\})/',
-                function (array $matches) use ($context) {
+                function (array $matches) use ($content, $context, $options, &$errors) {
                     $identifier = $matches['name'];
                     $parameters = [];
+
+                    $startPosition = strpos($content, $matches['macro']);
 
                     if (!empty($matches['method'])) {
                         $identifier .= '::' . $matches['method'];
@@ -75,10 +111,27 @@ trait MacroTrait
 
                     $parameters = array_map([$this, 'executeMacros'], $parameters, [$context]);
 
-                    return $this->runMacro($identifier, $parameters, $context);
+                    $result = $this->runMacro($identifier, $parameters, $context, $options);
+                    if ($options['validate']) {
+                        if (!$result instanceof Exception) {
+                            return $result;
+                        }
+
+                        $errors[] = [
+                            'position' => $startPosition,
+                            'macro' => $matches['macro'],
+                            'exception' => $result,
+                            'message' => $result->getMessage()
+                        ];
+                    }
+                    return $result;
                 },
                 $content, -1, $count
             );
+        }
+
+        if ($options['validate']) {
+            return (empty($errors)) ? true : $errors;
         }
 
         return $content;
