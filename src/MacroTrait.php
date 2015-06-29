@@ -47,19 +47,25 @@ trait MacroTrait
 
     public function executeMacros($content, $context = null)
     {
-        return preg_replace_callback('/\{\=(?P<name>[^\:\=\(]+)(\:\:(?P<method>[^\(\=]+))?(\((?P<parameters>.*)\))?\=\}/', function (array $matches) use ($context) {
-            $identifier = $matches['name'];
-            $parameters = [];
+        while ((!isset($count)) || $count > 1) {
+            $content = preg_replace_callback('/\{\=(?P<name>[^\:\=\(]+)(\:\:(?P<method>[^\(\=]+))?(\((?P<parameters>.*)\))?\=\}/', function (array $matches) use ($context) {
+                $identifier = $matches['name'];
+                $parameters = [];
 
-            if (!empty($matches['method'])) {
-                $identifier .= '::' . $matches['method'];
-            }
-            if (!empty($matches['parameters'])) {
-                $parameters = array_map('trim', explode(', ', $matches['parameters']));
-            }
+                if (!empty($matches['method'])) {
+                    $identifier .= '::' . $matches['method'];
+                }
+                if (!empty($matches['parameters'])) {
+                    $parameters = array_map('trim', explode(', ', $matches['parameters']));
+                }
 
-            return $this->runMacro($identifier, $parameters, $context);
-        }, $content);
+                $parameters = array_map([$this, 'executeMacros'], $parameters, [$context]);
+
+                return $this->runMacro($identifier, $parameters, $context);
+            }, $content, -1, $count);
+        }
+
+        return $content;
     }
 
     /**
