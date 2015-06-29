@@ -19,6 +19,10 @@ class ModelMacro extends Macro
 
     public function last($field)
     {
+        if (!$field) {
+            return null;
+        }
+
         $entity = $this->getTable()->find()->order([
             $this->getTable()->alias() . '.created' => 'DESC'
         ])->select([$field])->first();

@@ -2,12 +2,18 @@
 
 namespace Macro\Macro;
 
+use Cake\Core\InstanceConfigTrait;
 use Cake\Datasource\ModelAwareTrait;
 
 abstract class Macro
 {
 
     use ModelAwareTrait;
+    use InstanceConfigTrait;
+
+    protected $_defaultConfig = [
+        'context' => []
+    ];
 
     /**
      * The name of this Macro. Macro names are plural, named after the model they use.
@@ -27,6 +33,8 @@ abstract class Macro
         if ($name !== null) {
             $this->name = $name;
         }
+
+        $this->config($config);
 
         $this->modelFactory('Table', ['Cake\ORM\TableRegistry', 'get']);
         $modelClass = ($this->plugin ? $this->plugin . '.' : '') . $this->name;
@@ -52,6 +60,11 @@ abstract class Macro
 
     public function run()
     {
+    }
+
+    public function context()
+    {
+        return $this->config('context');
     }
 
 }

@@ -15,7 +15,7 @@ trait MacroTrait
      */
     private $_registry = null;
 
-    public function runMacro($identifier, array $options = [])
+    public function runMacro($identifier, array $parameters = [], $context = null)
     {
         if (Plugin::loaded('DebugKit')) {
             DebugTimer::start(__d('macro', 'Macro: {0}', $identifier));
@@ -25,9 +25,16 @@ trait MacroTrait
         $name = $macroParts[0];
         $method = isset($macroParts[1]) ? $macroParts[1] : 'run';
 
+        $this->getMacroRegistry()->reset();
+
+        $config = [];
+        if ($context) {
+            $config['context'] = $context;
+        }
+
         /** @var Macro $macro */
-        $macro = $this->getMacroRegistry()->load($name);
-        $result = call_user_func_array([$macro, $method], $options);
+        $macro = $this->getMacroRegistry()->load($name, $config);
+        $result = call_user_func_array([$macro, $method], $parameters);
 
         if (Plugin::loaded('DebugKit')) {
             DebugTimer::stop(__d('macro', 'Macro: {0}', $identifier));
@@ -38,9 +45,9 @@ trait MacroTrait
         return $result;
     }
 
-    public function executeMacros($content)
+    public function executeMacros($content, $context = null)
     {
-        return preg_replace_callback('/\{\=(?P<name>[^\:\=\(]+)(\:\:(?P<method>[^\(\=]+))?(\((?P<parameters>.*)\))?\=\}/', function (array $matches) {
+        return preg_replace_callback('/\{\=(?P<name>[^\:\=\(]+)(\:\:(?P<method>[^\(\=]+))?(\((?P<parameters>.*)\))?\=\}/', function (array $matches) use ($context) {
             $identifier = $matches['name'];
             $parameters = [];
 
@@ -51,7 +58,7 @@ trait MacroTrait
                 $parameters = array_map('trim', explode(', ', $matches['parameters']));
             }
 
-            return $this->runMacro($identifier, $parameters);
+            return $this->runMacro($identifier, $parameters, $context);
         }, $content);
     }
 

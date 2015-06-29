@@ -15,9 +15,9 @@ class MacroHelper extends Helper
         return $this->runMacro($name);
     }
 
-    public function execute($content)
+    public function execute($content, $context = null)
     {
-        return $this->executeMacros($content);
+        return $this->executeMacros($content, $context);
     }
 
 }
