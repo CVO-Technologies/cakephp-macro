@@ -23,10 +23,10 @@ class MacroHelper extends Helper
         return null;
     }
 
-    public function execute($content, $context = null)
+    public function execute($content, $context = null, array $options = [])
     {
         try {
-            return $this->executeMacros($content, $context);
+            return $this->executeMacros($content, $context, $options);
         }
         catch (MissingMacroException $missing) {
             trigger_error($missing->getMessage());

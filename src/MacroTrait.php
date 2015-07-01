@@ -95,7 +95,8 @@ trait MacroTrait
     {
         $options = Hash::merge(
             [
-                'validate' => false
+                'validate' => false,
+                'context' => 'default'
             ],
             $options
         );
@@ -104,7 +105,7 @@ trait MacroTrait
 
         while ((!isset($count)) || $count > 1) {
             $content = preg_replace_callback(
-                '/(?P<macro>\{\=(?P<name>[^\:\=\(]+)(?:\:\:(?P<method>[^\(\=]+))?(?:\((?P<parameters>.*)\))?\=\})/',
+                '/(?P<macro>\{\=(?P<name>[^\:\=\(\|]+)(?:\:\:(?P<method>[^\(\=\|]+))?(?:\((?P<parameters>.*)\))?(?:\|(?P<context>[^\(\=]+))?\=\})/',
                 function (array $matches) use ($content, $context, $options, &$errors) {
                     $identifier = $matches['name'];
                     $parameters = [];
@@ -116,6 +117,12 @@ trait MacroTrait
                     }
                     if (!empty($matches['parameters'])) {
                         $parameters = array_map('trim', explode(', ', $matches['parameters']));
+                    }
+                    if (!empty($matches['context'])) {
+                        $options['context'] = $matches['context'];
+                    }
+                    if ((is_array($context)) && (isset($context[$options['context']]))) {
+                        $context = $context[$options['context']];
                     }
 
                     $parameters = array_map([$this, 'executeMacros'], $parameters, [$context]);
