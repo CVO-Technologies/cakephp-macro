@@ -2,7 +2,6 @@
 
 namespace Macro;
 
-use Cake\Core\Exception\Exception;
 use Cake\Core\Plugin;
 use Cake\Utility\Hash;
 use DebugKit\DebugTimer;
@@ -61,7 +60,17 @@ trait MacroTrait
             return $missing;
         }
 
-        $result = call_user_func_array([$macro, $method], $parameters);
+        $callable = [$macro, $method];
+        if (!is_callable($callable)) {
+            $exception = new \BadMethodCallException('Unknown method \'' . $method . '\' in macro ' . get_class($macro));
+            if (!$options['validate']) {
+                throw $exception;
+            }
+
+            return $exception;
+        }
+
+        $result = call_user_func_array($callable, $parameters);
 
         if (Plugin::loaded('DebugKit')) {
             DebugTimer::stop(__d('macro', 'Macro: {0}', $identifier));
@@ -113,7 +122,7 @@ trait MacroTrait
 
                     $result = $this->runMacro($identifier, $parameters, $context, $options);
                     if ($options['validate']) {
-                        if (!$result instanceof Exception) {
+                        if (!$result instanceof \Exception) {
                             return $result;
                         }
 
