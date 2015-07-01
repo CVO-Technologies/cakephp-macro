@@ -26,12 +26,12 @@ class EntityTimeMacro extends Macro
     }
 
     /**
+     * @param null $context
      * @return Entity
      */
-    public function context()
+    public function context($context = null)
     {
-        return parent::context();
+        return parent::context($context);
     }
-
 
 }

@@ -13,10 +13,4 @@ class VersionMacro extends Macro
         return Configure::read('Macro.version');
     }
 
-    protected function _validateContext($context)
-    {
-        throw new InvalidContextException('No context is supported');
-    }
-
-
 }

@@ -3,6 +3,7 @@
 namespace Macro\View\Helper;
 
 use Cake\View\Helper;
+use Macro\Error\MacroException;
 use Macro\Error\MissingMacroException;
 use Macro\MacroTrait;
 
@@ -16,7 +17,7 @@ class MacroHelper extends Helper
         try {
             return $this->runMacro($name);
         }
-        catch (MissingMacroException $missing) {
+        catch (MacroException $missing) {
             trigger_error($missing->getMessage());
         }
 
@@ -28,7 +29,7 @@ class MacroHelper extends Helper
         try {
             return $this->executeMacros($content, $context, $options);
         }
-        catch (MissingMacroException $missing) {
+        catch (MacroException $missing) {
             trigger_error($missing->getMessage());
         }
 
