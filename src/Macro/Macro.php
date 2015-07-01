@@ -4,6 +4,8 @@ namespace Macro\Macro;
 
 use Cake\Core\InstanceConfigTrait;
 use Cake\Datasource\ModelAwareTrait;
+use Macro\Error\InvalidContextException;
+use Macro\Error\MacroException;
 
 abstract class Macro
 {
@@ -65,9 +67,30 @@ abstract class Macro
     {
     }
 
-    public function context()
+    public function context($context = null)
     {
+        if ($context) {
+            try {
+                $this->_validateContext($context);
+            }
+            catch (InvalidContextException $exception) {
+                throw $exception;
+            }
+
+            return $this->config('context', $context);
+        }
+
         return $this->config('context');
+    }
+
+    /**
+     * @param $context
+     * @throws InvalidContextException
+     * @return bool
+     */
+    protected function _validateContext($context)
+    {
+        return true;
     }
 
 }

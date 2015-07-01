@@ -5,7 +5,8 @@ namespace Macro;
 use Cake\Core\Plugin;
 use Cake\Utility\Hash;
 use DebugKit\DebugTimer;
-use Macro\Error\MissingMacroException;
+use Macro\Error\MacroException;
+use Macro\Error\MissingMacroMethodException;
 use Macro\Macro\Macro;
 use Macro\Macro\MacroRegistry;
 
@@ -21,7 +22,7 @@ trait MacroTrait
      * @param $identifier
      * @param array $parameters
      * @param null $context
-     * @throws MissingMacroException
+     * @throws MacroException
      * @return mixed
      */
     public function runMacro($identifier, array $parameters = [], $context = null, array $options = [])
@@ -44,15 +45,16 @@ trait MacroTrait
         $this->getMacroRegistry()->reset();
 
         $config = [];
-        if ($context) {
-            $config['context'] = $context;
-        }
 
         /** @var Macro $macro */
         try {
             $macro = $this->getMacroRegistry()->load($name, $config);
+
+            if ($context) {
+                $macro->context($context);
+            }
         }
-        catch (MissingMacroException $missing) {
+        catch (MacroException $missing) {
             if (!$options['validate']) {
                 throw $missing;
             }
@@ -62,7 +64,7 @@ trait MacroTrait
 
         $callable = [$macro, $method];
         if (!is_callable($callable)) {
-            $exception = new \BadMethodCallException('Unknown method \'' . $method . '\' in macro ' . get_class($macro));
+            $exception = new MissingMacroMethodException('Unknown method \'' . $method . '\' in macro ' . get_class($macro));
             if (!$options['validate']) {
                 throw $exception;
             }

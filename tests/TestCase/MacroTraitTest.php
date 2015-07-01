@@ -159,6 +159,14 @@ class MacroTraitTest extends TestCase
     }
 
     /**
+     * @expectedException \Macro\Error\InvalidContextException
+     */
+    public function testInvalidContext()
+    {
+        $this->macroTrait->executeMacros('{=Macro.Version=}', new StdClass);
+    }
+
+    /**
      * @expectedException \Macro\Error\MissingMacroException
      */
     public function testExecuteNonExistingMacro()
