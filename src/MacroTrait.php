@@ -72,11 +72,14 @@ trait MacroTrait
 
         $result = call_user_func_array($callable, $parameters);
 
+        $elapsedTime = null;
         if (Plugin::loaded('DebugKit')) {
+            $elapsedTime = DebugTimer::elapsedTime(__d('macro', 'Macro: {0}', $identifier), 10) * 1000;
+
             DebugTimer::stop(__d('macro', 'Macro: {0}', $identifier));
         }
 
-        DebugMacro::record($identifier, $result);
+        DebugMacro::record($identifier, $parameters, $context, $options, $result, $elapsedTime);
 
         if ($options['validate']) {
             return true;
