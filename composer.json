@@ -2,7 +2,7 @@
     "name": "cvo-technologies/macro",
     "type": "cakephp-plugin",
     "require": {
-        "cakephp/cakephp": "3.0.*"
+        "cakephp/cakephp": "3.*"
     },
     "require-dev": {
         "cakephp/cakephp-codesniffer": "dev-master",
