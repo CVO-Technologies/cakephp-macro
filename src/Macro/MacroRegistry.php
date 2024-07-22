@@ -79,7 +79,7 @@ class MacroRegistry extends ObjectRegistry
      * @param string $class Partial classname to resolve.
      * @return string|false Either the correct classname or false.
      */
-    protected function _resolveClassName($class)
+    protected function _resolveClassName($class): ?string
     {
         return App::className($class, 'Macro', 'Macro');
     }
@@ -94,7 +94,7 @@ class MacroRegistry extends ObjectRegistry
      * @return void
      * @throws \RuntimeException
      */
-    protected function _throwMissingClassError($class, $plugin)
+    protected function _throwMissingClassError($class, $plugin): void
     {
         throw new MissingMacroException("Unable to find '$class' macro.");
     }

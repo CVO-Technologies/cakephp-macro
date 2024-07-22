@@ -36,9 +36,10 @@ abstract class Macro
             $this->name = $name;
         }
 
-        $this->config($config);
+        $this->setConfig($config);
 
         $this->modelFactory('Table', ['Cake\ORM\TableRegistry', 'get']);
+        $this->plugin = null;
         $modelClass = ($this->plugin ? $this->plugin . '.' : '') . $this->name;
         $this->_setModelClass($modelClass);
     }
@@ -77,10 +78,10 @@ abstract class Macro
                 throw $exception;
             }
 
-            return $this->config('context', $context);
+            return $this->setConfig('context', $context);
         }
 
-        return $this->config('context');
+        return $this->getConfig('context');
     }
 
     /**
